@@ -1,0 +1,19 @@
+{
+  "name": "campus-sistema-academico",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Sistema académico con frontend, API, autenticación y autorización por perfiles.",
+  "engines": {
+    "node": ">=22 <27"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.cjs",
+    "test": "node --test test/*.test.cjs",
+    "build": "node scripts/build.cjs"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guía del sistema académico</title><link rel="stylesheet" href="styles.css"></head>
+<body><main class="panel help-card" style="max-width:850px;margin:35px auto;padding:32px"><a class="text-link" href="/">Volver a Campus</a><h1>Guía del sistema académico</h1>
+<p>Campus reúne la gestión institucional, la planeación y el seguimiento académico. El proyecto utiliza datos ficticios para la revisión de Ingeniería de Software II.</p>
+<h2>Recorrido por perfiles</h2><ol>
+<li><strong>Administrador.</strong> Consulta Comunidad, crea un aula y prueba un código duplicado. El administrador puede ver el registro de cambios.</li>
+<li><strong>Coordinador.</strong> Revisa Carga académica. Intenta asignar al docente de Ingeniería de Software II otra clase el martes entre 09:00 y 11:00. La carga de ejemplo de 08:00 a 10:00 impide guardar ese cruce.</li>
+<li><strong>Docente.</strong> En Asistencia, abre la sesión de ejemplo y registra una lectura simulada. En Calificaciones registra 4,0, 4,0 y 5,0 para Valentina García. La ponderación 30/30/40 produce 4,4.</li>
+<li><strong>Estudiante.</strong> Consulta el horario, la asistencia propia, la definitiva y el avance del plan. Usa Horarios para probar una inscripción.</li></ol>
+<h2>Seguridad y datos</h2><p>Las contraseñas se verifican con scrypt y una sal aleatoria. El navegador recibe una cookie de sesión. El servidor verifica el rol, valida los cambios y devuelve los datos que corresponden a la cuenta. PostgreSQL conserva los datos y el historial de operaciones.</p>
+<p>El sensor sigue siendo una simulación. El proyecto académico utiliza cuatro cuentas de revisión. La operación institucional requeriría gestionar cuentas reales, establecer copias de seguridad y verificar la recuperación.</p></main></body></html>
