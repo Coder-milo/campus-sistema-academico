@@ -3,6 +3,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { once } = require('node:events');
 const { randomBytes } = require('node:crypto');
+const { Pool } = require('pg');
 const { initialize } = require('../lib/store.cjs');
 const { createApp } = require('../server.cjs');
 const { accounts, seed } = require('../lib/data.cjs');
@@ -27,11 +28,22 @@ test('El dominio impide modificar notas de otro docente y cruces de horario', ()
 
 test('API real con PostgreSQL: autenticación, CSRF, roles, concurrencia y auditoría', {skip:!process.env.CAMPUS_TEST_DATABASE_URL}, async t => {
   const passwords = Object.fromEntries(accounts.map(a=>[a.user,randomBytes(21).toString('base64url')]));
-  const pool = await initialize(process.env.CAMPUS_TEST_DATABASE_URL,JSON.stringify(passwords));
+  const connection = new URL(process.env.CAMPUS_TEST_DATABASE_URL);
+  const isolatedSchema = 'campus_qa_' + randomBytes(8).toString('hex');
+  const control = new Pool({connectionString:connection.href});
+  let pool, server;
+  t.after(async()=>{
+    if (server) await new Promise(resolve=>server.close(resolve));
+    if (pool) await pool.end();
+    try { await control.query(`DROP SCHEMA IF EXISTS ${isolatedSchema} CASCADE`); }
+    finally { await control.end(); }
+  });
+  await control.query(`CREATE SCHEMA ${isolatedSchema}`);
+  connection.searchParams.set('options', `-c search_path=${isolatedSchema}`);
+  pool = await initialize(connection.href,JSON.stringify(passwords));
   const app = await createApp(pool);
-  const server=app.listen(0,'127.0.0.1');
+  server=app.listen(0,'127.0.0.1');
   await once(server,'listening');
-  t.after(async()=>{await new Promise(resolve=>server.close(resolve));await pool.end();});
   const origin=`http://127.0.0.1:${server.address().port}`;
   const call=(route,{body,session,source=origin,withCsrf=true}={})=>fetch(origin+'/api/'+route,{
     method:body===undefined?'GET':'POST',
@@ -71,4 +83,6 @@ test('API real con PostgreSQL: autenticación, CSRF, roles, concurrencia y audit
   const web=await fetch(origin+'/');
   assert.match(web.headers.get('content-security-policy'),/script-src 'self'/);
   assert.equal((await fetch(origin+'/lib/data.cjs')).status,404);
+  for (let i=0;i<8;i++) assert.equal((await call('login',{body:{username:'no-existe',password:'equivocada'}})).status,401);
+  assert.equal((await call('login',{body:{username:'no-existe',password:'equivocada'}})).status,429);
 });
